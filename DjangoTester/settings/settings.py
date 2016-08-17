@@ -31,6 +31,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'lock',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -70,7 +71,7 @@ WSGI_APPLICATION = 'DjangoTester.wsgi.application'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Seoul/Asia'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 
