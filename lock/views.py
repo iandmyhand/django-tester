@@ -13,13 +13,15 @@ logger = logging.getLogger('default')
 class TestLockViewSet(APIView):
 
     def get(self, request):
+        _pk = int(request.GET.get('pk'))
         _data = int(request.GET.get('data'))
+        logger.warn('pk:' + str(_pk))
         _return_data = {
             'code': 0,
             'message': 'OK',
         }
         try:
-            _lockable = self._transaction_get(_data)
+            _lockable = self._transaction_get(_pk, _data)
             _return_data['result'] = str(_lockable)
         except Exception as e:
             logger.error('exception: ' + str(e))
@@ -29,8 +31,8 @@ class TestLockViewSet(APIView):
     WAIT = 10
 
     @transaction.atomic
-    def _transaction_get(self, data):
-        _lockable = Lockable.objects.select_for_update().get(pk=1)
+    def _transaction_get(self, pk, data):
+        _lockable = Lockable.objects.select_for_update().get(pk=pk)
 
         logger.debug('select lockable row %s...' % str(_lockable))
         for i in range(self.WAIT):
@@ -42,11 +44,11 @@ class TestLockViewSet(APIView):
         logger.debug('updated lockable row %s...' % str(_lockable))
 
         try:
-            _lockable = self._transaction_get2(data, raise_exception=True)
+            _lockable = self._transaction_get2(pk, data, raise_exception=True)
         except Exception as e:
             logger.error(str(e))
 
-        _lockable = self._transaction_get2(data)
+        _lockable = self._transaction_get2(pk, data)
 
         logger.debug('select lockable row %s...' % str(_lockable))
         for i in range(self.WAIT):
@@ -57,11 +59,11 @@ class TestLockViewSet(APIView):
         _lockable.save()
         logger.debug('updated lockable row %s...' % str(_lockable))
 
-        return self._transaction_get2(data)
+        return self._transaction_get2(pk, data)
 
     @transaction.atomic
-    def _transaction_get2(self, data, raise_exception=False):
-        _lockable = Lockable.objects.select_for_update().get(pk=1)
+    def _transaction_get2(self, pk, data, raise_exception=False):
+        _lockable = Lockable.objects.select_for_update().get(pk=pk)
         logger.debug('select lockable row %s...' % str(_lockable))
         for i in range(self.WAIT):
             logger.debug('waiting %s seconds...' % (self.WAIT - i))
